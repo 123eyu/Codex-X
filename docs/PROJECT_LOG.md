@@ -16,6 +16,7 @@
 - 新增与生产 helper 共用的隔离回归，覆盖启动器 PID、延迟主进程、无进程、其它安装拒绝及真实 Windows junction；正常客户端与调试连接仍须匹配已验证安装、当前用户/会话和创建时间，调试端口仍校验实际所有者。测试仅操作临时 fixtures，不停止用户的真实客户端。
 - [Windows 快验 43596723963](https://github.com/yynxxxxx/Codex-X/actions/runs/43596723963) 通过，Windows PowerShell 5.1 和 PowerShell 7 各执行 16 项检查，包括真实 junction 与测试宿主原生句柄绑定。本机 Rust 恢复测试 9 项、更新清单 11 项、WSL fixture 6 项、类型检查和前端构建通过。Node 195 项通过；另 2 项读取本机已安装 ChatGPT 的可选 SDK 形状测试失败，未修改的 main 上同样失败，属于本机新版 SDK 与旧测试模板不匹配；未将其记为通过或修改测试掩盖差异。
 - v0.3.34 沿用 MSI 安装与在线更新，正式发布继续执行 Windows 原生测试、MSI 安装升级检查和四平台打包。Windows 现场的实际 Store 客户端重启仍需安装新版后复测；自动化 fixture 不等于用户现场实测。
+- 首轮 [Release 43596805244](https://github.com/yynxxxxx/Codex-X/actions/runs/43596805244) 未发布：Apple 公证返回开发者协议缺失/过期的 403，维护者随后确认已处理；Windows Rust 1.100 编译完成，但测试产物变为 `target/release/build/codex-x/<hash>/out/codexx_lib-<hash>.exe`，旧 CI helper 只接受 `deps` 目录，因而在执行测试前拒绝。修正主分支的 CI helper 后使用 `workflow_dispatch` 重新构建同一草稿标签；既有发布工作流从触发提交读取 `.ci-tools`，无需移动 v0.3.34 标签或修改其应用代码。
 
 ## 2026-11-09：Windows 重启路径竞态与 macOS 启动恢复
 
