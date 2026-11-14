@@ -8,6 +8,14 @@
 
 日志不得包含 Token、认证文件内容、用户数据或仅适用于某台电脑的隐私路径。
 
+## 2026-11-14：Windows Store 激活身份与 PowerShell 空结果
+
+- 用户报告 Windows 11 普通重启总是出现 “Windows activated a different executable” 并伴随无有效客户端结果。代码确认旧逻辑将 ActivateApplication 返回 PID 直接当作 Electron 主进程，且仅比较路径字符串；启动器交接与 WindowsApps junction 的实际卷路径均可能被误拒绝。
+- 对照 [BigPizzaV3/CodexPlusPlus](https://github.com/BigPizzaV3/CodexPlusPlus/tree/e548ad0) 的 Windows 启动与停止策略：AUMID 激活回执不是最终桌面进程身份，路径需要解析 junction。仅参考行为独立实现，没有复制其 AGPL 源码。
+- [PowerShell 5.1 文档](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertto-json?view=powershell-5.1) 明确说明 null 输入不输出文本。当前生产环境固定调用 Windows PowerShell 5.1，旧 Emit 在无主进程时生成空 stdout，导致 Rust JSON 解码失败，继而阻断恢复。修复由 Emit 明确返回 JSON null，不把任意无输出命令当作有效结果。
+- 新增与生产 helper 共用的隔离回归，覆盖启动器 PID、延迟主进程、无进程、其它安装拒绝及真实 Windows junction；正常客户端与调试连接仍须匹配已验证安装、当前用户/会话和创建时间，调试端口仍校验实际所有者。测试仅操作临时 fixtures，不停止用户的真实客户端。
+- v0.3.34 沿用 MSI 安装与在线更新，正式发布继续执行 Windows 原生测试、MSI 安装升级检查和四平台打包。Windows 现场的实际 Store 客户端重启仍需安装新版后复测；自动化 fixture 不等于用户现场实测。
+
 ## 2026-11-09：Windows 重启路径竞态与 macOS 启动恢复
 
 - 用户报告 Windows 客户端已经被关闭，随后因 CIM 进程路径不可读报错而没有重开。确认旧 StopDesktop 关闭后反复全局扫描同名进程，退出中的空路径记录会抛错；普通独立版的启动确认异常还会主动终止刚启动的进程。
